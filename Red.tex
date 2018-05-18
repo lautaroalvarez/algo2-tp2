@@ -1,0 +1,620 @@
+\begin{Interfaz}
+
+  \textbf{usa}: \tadNombre{conj($\alpha$), itConj($\alpha$), lista($\alpha$), itLista($\alpha$)}.
+  
+  \textbf{se explica con}: \tadNombre{Red}.
+
+  \textbf{g\'eneros}: \TipoVariable{red}.
+
+  \Titulos{Operaciones de Red}
+
+  \InterfazFuncion{Computadoras}{\In{r}{red}}{conj(hostname)}
+  {$res$ $=_{obs}$ dameHostnames(computadoras($r$))}%
+  [O(n)]
+  [devuelve el conjunto de las computadoras.]
+  [res se devuelve por copia.]
+
+  \InterfazFuncion{Conectadas?}{\In{r}{red}, \In{c1}{hostname}, \In{c2}{hostname}}{bool}
+  [$c1,\ c2$ $\in$ dameHostnames(computadoras($r$))]
+  {$res$ $=_{obs}$ conectadas?($r$, dameCompu($c1$), dameCompu($c2$))}
+  [O(n*L)]
+  [indica si las computadoras estan conectadas por alguna de sus interfaces.]
+  []
+
+  \InterfazFuncion{InterfazUsada}{\In{r}{red}, \In{c1}{hostname}, \In{c2}{hostname}}{interfaz}
+  [conectadas?($r$, dameCompu($c1$), dameCompu($c2$))]
+  {$res$ $=_{obs}$ interfazUsada($r$, dameCompu($c1$), dameCompu($c2$))}
+  [O(n*L)]
+  [devuelve la interfaz por la cual estan conectadas c1 y c2.]
+  []
+
+  \InterfazFuncion{IniciarRed}{}{red}
+  [true]
+  {$res$ $=_{obs}$ iniciarRed()}
+  [O(1)]
+  [crear una nueva Red.]
+  []
+  
+  \InterfazFuncion{AgregarCompu}{\Inout{r}{red}, \In{c1}{compu}}{}
+  [$r$ = $r_0$ $\wedge$
+  (\paratodo{compu}{c}) $c$ $\in$ computadoras($r_0$) $\Rightarrow$ ip($c$) $\neq$ ip($c1$)]
+  {$r$ $=_{obs}$ agregarComputadora($r_0$, $c1$)}
+  [O(L+i) i=cantidad de interfaces]
+  [agregar una computadora a la Red.]
+  [la computadora se agrega por copia.]
+
+  \InterfazFuncion{Conectar}{\Inout{r}{red}, \In{c_1}{hostname}, \In{i_1}{interfaz} \In{c_2}{hostname}, \In{i_2}{interfaz}}{}
+  [$r$ = $r_0$ $\wedge$ $c_1, c_2$ $\in$ dameHostnames(computadoras($r$)) $\wedge$ $c_1$ $\neq$ $c_2$	$\wedge$ \newline $\neg$conectadas?($r$, dameCompu($c_1$), dameCompu($c_2$)) $\wedge$ $\neg$usaInterfaz?($r$, dameCompu($c_1$), $i_1$) $\wedge$ $\neg$usaInterfaz?($r$, dameCompu($c_2$), $i_2$) $\wedge$ $i_1$ $\in$ dameCompu($c_1$).interfaces $\wedge$ $i_2$ $\in$ dameCompu($c_2$).interfaces]
+  {$r$ $=_{obs}$ (conectar($r_0$, dameCompu($c_1$), $i_1$, dameCompu($c_2$), $i_2$)}
+  [O(n$^{6}$ + n$^{5}$ * L)]
+  [conectar dos computadoras de la red.]
+  []
+   
+  \InterfazFuncion{Vecinos}{\In{r}{red}, \In{c}{hostname}}{conj(hostname)}
+  [$c$ $\in$ dameHostnames(computadoras($r$))]
+  {$res$ $=_{obs}$ dameHostnames(vecinos($r$, dameCompu($c$)))}
+  [O(n*L)]
+  [da el conjunto de computadoras vecinas.]
+  [el conjunto se devuelve por copia.]
+
+  \InterfazFuncion{UsaInterfaz?}{\In{r}{red}, \In{c}{hostname}, \In{i}{interfaz}}{bool}
+  [$c$ $\in$ dameHostnames(computadoras($r$))]
+  {$res$ $=_{obs}$ usaInterfaz?($r$, dameCompu($c$), $i$)}
+  [O(n)]
+  [indica si la interfaz est\'a siendo utilizada.]
+  []
+
+  \InterfazFuncion{CaminosMinimos}{\In{r}{red}, \In{c_1}{hostname}, \In{c_2}{hostname}}{conj(lista(hostname))}
+  [$c1,\ c2$ $\in$ dameHostnames(computadoras($r$))]
+  {$res$ $=_{obs}$ dameCaminosdeHostnames(caminosMinimos($r$, dameCompu($c_1$), dameCompu($c_2$)))}
+  [O(n*L)]
+  [devuelve los conjuntos de caminos minimos entre las computadoras ingresadas.]
+  [res se devuelve por copia.]
+  
+  \InterfazFuncion{HayCamino?}{\In{r}{red}, \In{c_1}{hostname}, \In{c_2}{hostname}}{bool}
+  [$c1,\ c2$ $\in$ dameHostnames(computadoras($r$))]
+  {$res$ $=_{obs}$ hayCamino?($r$, dameCompu($c_1$), dameCompu($c_2$))}
+  [O(n*n)]
+  [indica si las computadoras son alcanzables mediante alg\'un camino.]
+  []
+  
+  \InterfazFuncion{$\bullet == \bullet$}{\In{r_1}{red}, \In{r_2}{red}}{bool}
+  [true]
+  {$res$ =$_{obs}$ ($r_1$ =$_{obs}$ $r_2$}%
+  [O(n*n * ( L + n*n + m ) + n*m*m)]
+  [indica si dos redes son iguales.]
+  [] 
+  
+  \InterfazFuncion{Copiar}{\In{r}{red}}{red}
+  {$res$ =$_{obs}$ r}
+  []
+  [O(n$^{3}$)]
+  [copia la red.]
+  [res se devuelve por copia]
+  
+   \textbf{donde:} \newline 
+   \TipoVariable{hostname} es \TipoVariable{string}, \newline
+   \TipoVariable{interfaz} es \TipoVariable{nat}, \newline
+   \TipoVariable{compu} es \TipoVariable{tupla}< ip: \TipoVariable{hostname}, interfaces: \TipoVariable{conj}(\TipoVariable{interfaz})>.
+   
+\end{Interfaz}
+
+\textbf{} %dejo un espacio
+
+\textbf{Especificaci\'on de las operaciones auxiliares utilizadas en la interfaz (no exportadas)}
+
+\begin{tad}{\tadNombre{Red extendida}}
+
+\tadExtiende{\tadNombre{Red}}
+
+\setlength{\tadAnchoTipoFunciones}{0pt}
+
+\tadOtrasOperaciones 
+
+\tadOperacion{damehostnames}{conj(compu)}{conj(hostname)}{}
+\tadOperacion{dameCompu}{red /r, hostname /s}{compu}{$s$ $\in$ hostnames($r$)}
+\tadOperacion{auxDameCompu}{red /r, hostname /s, conj(compu) /cc}{compu}{$s$ $\in$ hostnames($r$) $\wedge$ $cc$ $\subset$ computadoras($r$)}
+\tadOperacion{dameCaminosDeHostnames}{conj(secu(compu))}{conj(secu(hostname))}{}
+\tadOperacion{dameSecuDeHostnames}{secu(compu)}{secu(hostname)}{}
+
+\tadAxiomas[\paratodo{red}{r}, \paratodo{conj(compu)}{cc}, \paratodo{hostname}{s}, \paratodo{conj(secu(compu))}{cs}, \paratodo{secu(compu)}{secu}]
+
+\tadAxioma{dameHostnames($cc$)}
+{ \IF {vacio?($cc$)} 
+THEN {$\emptyset$}
+ELSE {Ag( ip(dameUno($cc$)), dameHostnames(sinUno($cc$)) )}
+FI}
+
+\tadAxioma{dameCompu($r$, $s$)}{auxDameCompu($r$, $s$, computadoras($r$))}
+
+\tadAxioma{auxDameCompu($r$, $s$, $cc$)}
+{ \IF {ip(dameUno($cc$)) = $s$} 
+THEN {dameUno($cc$)}
+ELSE {auxDameCompu($r$, $s$, sinUno($cc$))}
+FI}
+
+\tadAxioma{dameCaminosDeHostnames($cs$)}
+{ \IF {vacio?($cs$)} 
+THEN {$\emptyset$}
+ELSE {Ag( dameSecuDeHostnames(dameUno($cs$)), dameCaminosDeHostnames(sinUno($cs$)) )}
+FI}
+
+\tadAxioma{dameSecuDeHostnames($secu$)}
+{ \IF {vacia?($secu$)} 
+THEN {$<>$}
+ELSE {ip(prim($secu$)) $\bullet$ dameSecuDeHostnames(fin($secu$)) }
+FI}
+
+\end{tad}
+
+\begin{Representacion}
+
+\begin{Estructura}{red}[estr\_red]
+
+\textbf{donde:} \newline 
+\TipoVariable{estr\_red} es \TipoVariable{dicc(hostname, datos)} \newline
+   
+\begin{Tupla}[datos]
+\tupItem{interfaces}{\TipoVariable{conj(interfaz)}} \newline \nomoreitems{}	 
+\tupItem{conexiones}{\TipoVariable{dicc(interfaz, hostname)}} \newline \nomoreitems{}
+\tupItem{alcanzables}{\TipoVariable{dicc(dest: hostname, caminos: conj(lista(hostname)))}}
+\end{Tupla}
+
+\TipoVariable{hostname} es \TipoVariable{string}, \TipoVariable{interfaz} es \TipoVariable{nat}.
+
+\end{Estructura}
+\Comment{Al no tener que cumplir con complejidades utilizamos un diccionario con los hostnames como claves. El significado de cada hostname corresponde a una tupla con datos de la computadora con ese hostname.}\newline
+
+\comentario{Rep en Castellano: \newline
+Para cada computadora: \newline
+1: Las interfaces usadas pertenecen al conjunto de interfaces de la compu.\newline
+2: Los vecinos pertenecen a las computadoras de la red.\newline
+3: Los vecinos son distintos a la compu actual.\newline
+4: Los vecinos no se repiten.\newline
+5: Las conexiones son bidireccionales.\newline
+6: Los alcanzables pertenecen a las computadoras de la red.\newline
+7: Los alcanzables son distintos a la actual.\newline
+8: Los alcanzables tienen un camino v\'alido hacia ellos desde la actual.\newline
+9: Para cada alcanzable, el conjunto de camiinos v\'alidos no es vac\'io.\newline
+10: Todos los caminos en el diccionario alcanzables son v\'alidos.\newline
+11: Los caminos son m\'inimos.\newline
+12: Est\'an todos los m\'inimos.
+}
+
+\tadAlinearFunciones{REP}{estr\_red /e}
+
+\Rep[estr\_red]{
+	($\forall$ $c$: hostname, $c$ $\in$ claves($e$)) \textcolor{red}{(} 
+	\comentario{1} claves(obtener($e$, $c$).conexiones) $\subseteq$ obtener($e$, $c$).interfaces $\wedge$ \newline
+	 ($\forall$ $i$: interfaz, $i$ $\in$ claves(obtener($e$, $c$).conexiones)) \textcolor{blue}{(}  
+	\comentario{2} obtener(obtener($e$, $c$).conexiones, $i$) $\in$ claves($e$) $\wedge$ 	
+	\comentario{3} obtener(obtener($e$, $c$).conexiones, $i$) $\neq$ $c$ 	$\wedge$ 
+	\comentario{4} ($\neg$ $\exists$ $i\sp{\prime}$: interfaz, $i\sp{\prime}$ $\in$ claves(obtener($e$, $c$).conexiones), $i$ $\neq$ $i\sp{\prime}$) obtener(obtener($e$, $c$).conexiones, $i$) == obtener(obtener($e$, $c$).conexiones, $i\sp{\prime}$) $\wedge$ 
+	\comentario{5} ($\forall$ $h$: hostname) ( $h$ == obtener(obtener($e$, $c$).conexiones, $i$)
+	$\Rightarrow$ ($\exists$ $i\sp{\prime}$:int) obtener(obtener($e$, $h$).conexiones, $i\sp{\prime}$) == $c$ ) 
+	\textcolor{blue}{)} $\wedge$ 
+	\comentario{6} claves(obtener($e$, $c$).alcanzables $\subseteq$ claves($e$) $\wedge$ \newline
+	 ($\forall$ $a$: hostname, $a$ $\in$ claves(obtener($e$, $c$).alcanzables) \textcolor{blue}{(} 
+	\comentario{7} $a$ $\neq$ $c$ $\wedge$ 
+	\comentario{8} ($\exists$ $s$: secu(hostname)) esCaminoV\'alido($c$, $a$, $s$)  $\wedge$ 
+	\comentario{9} $\#$obtener(obtener($e$, $c$).alcanzables, $a$) > 0 $\wedge_L$ \newline
+	($\forall$ $camino$: secu(hostname), $camino$ $\in$ obtener(obtener($e$, $c$).alcanzables, $a$) (
+	\comentario{10} esCaminoV\'alido($c$, $a$, $camino$) $\wedge$ 
+	\comentario{11} $\neg$($\exists$ $camino\sp{\prime}$: secu(hostname), $camino$ $\neq$ $camino\sp{\prime}$, esCaminoV\'alido($c$, $a$, $camino\sp{\prime}$)) long($camino\sp{\prime}$) < long($camino$ ) $\wedge$ 
+	\comentario{12} $\neg$($\exists$ $camino\sp{\prime}$: secu(hostname), $camino$ $\neq$ $camino\sp{\prime}$, esCaminoV\'alido($c$, $a$, $camino\sp{\prime}$), long($camino$ == long($camino\sp{\prime}$)) ($camino\sp{\prime}$ $\notin$ obtener(obtener($e$, $c$).alcanzables, $a$) )
+	\newline \textcolor{blue}{)} \textcolor{red}{)}
+}
+
+La abreviatura $esCaminoValido$ usada en el Rep se debe leer: (no son funciones, son abreviaturas para hacer m\'as f\'acil la lectura)
+
+\tadAxioma{$esCaminoValido$ ($orig$, $dest$, $secu$)} {  
+	( prim($secu$) == $orig$ $\wedge$ \newline
+	($\forall$ $i$: nat, 0 $<$ $i$ $<$ long($secu$) ) esVecino ($secu[i]$, $secu[i+1]$) $\wedge$ \newline
+	$secu$ [long($secu$)-1] == $dest$ $\wedge$ \newline
+	sinRepetidos($secu$) )
+	}
+
+Con $esVecino$ ($h1$, $h2$) $\equiv$  ($\exists$ $i$: interfaz) $h2$ == obtener (obtener($e$, $h1$).conexiones, $i$) 
+
+\textbf{}
+\textbf{}
+
+\AbsFc[estr\_red]{red}[e]{$r$ $|$ computadoras ($r$) = dameComputadoras($e$) $\wedge_L$ \newline
+	($\forall$ $c1$, $c2$: compu, $c1$, $c2$ $\in$ computadoras($r$)) conectadas?($r$, $c1$, $c2$) = ($\exists$ $i$: interfaz) ( $c2$.ip = obtener(obtener($e$, $c1$.ip).conexiones, $i$) ) $\wedge_L$ \newline
+	interfazUsada($r$, $c1$, $c2$) = buscarClave (obtener($e$, $c1$.ip).conexiones, $c2$.ip)	
+	}
+
+\textbf{} %dejo un espacio
+
+\newpage
+
+\textbf{Especificaci\'on de las funciones auxiliares utilizadas en abs}
+
+\tadAlinearFunciones{auxDameComputadoras}{dicc(interfaz, hostname), hostname, conj(interfaz)}
+
+\tadOperacion{dameComputadoras}{dicc(hostname; X)}{conj(computadoras)}{}
+\tadOperacion{auxDameComputadoras}{dicc(hostname; X), conj(hostname)}{conj(computadoras)}{}
+\tadOperacion{buscarClave}{dicc(interfaz; hostname), hostname}{interfaz}{}
+\tadOperacion{auxBuscarClave}{dicc(interfaz; hostname), hostname, conj(interfaz)}{interfaz}{}
+
+\tadAxiomas[\paratodo{dicc(hostname, X)}{e}, \paratodo{dicc(interfaz, hostname)}{d}, \paratodo{conj(hostname)}{cc}, \paratodo{conj(interfaz)}{ci}, \paratodo{hostname}{h}]
+
+\tadAxioma{dameComputadoras($e$)}{auxDameComputadoras($e$, claves($e$))}
+\tadAxioma{auxDameComputadoras($e$, $cc$)}
+{ \IF {$\emptyset$?($cc$)} 
+THEN {$\emptyset$}
+ELSE {Ag( <dameUno($cc$), obtener($e$, dameUno($cc$)).interfaces>, auxDameComputadoras($e$, sinUno($cc$)) )}
+FI}
+
+\tadAxioma{buscarClave($d$, $h$)}{auxBuscarClave($d$, $h$, claves($d$))}
+\tadAxioma{auxBuscarClave($d$, $h$, $ci$)}
+{ \IF {obtener($d$, dameUno($cc$)) = $h$} 
+THEN {dameUno($cc$)}
+ELSE {auxBuscarClave($d$, $h$, sinUno($ci$))}
+FI}
+
+\end{Representacion}
+
+\newpage
+
+\begin{Algoritmos}
+\begin{algorithm}
+\caption{Implementaci\'on de Computadoras}
+\begin{algorithmic}[0]
+\Function{iComputadoras}{in r: estr\_red}{$\rightarrow$ res: conj(hostname)}
+	\State it $\gets$ crearIt(r) \Comment{O(1)}
+	\State res $\gets$ Vacio() \Comment{conjunto} \Comment{O(1)}
+	\While{HaySiguiente(it)} \Comment{Guarda: O(1)} \Comment{El ciclo se ejecuta n veces} \Comment{O(n)}
+		\State Agregar(res, SiguienteClave(it)) \Comment{O(1)}
+		\State Avanzar(it) \Comment{O(1)}
+	\EndWhile
+\EndFunction \Comment{\textbf{O(n)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Conectadas?}
+\begin{algorithmic}[0]
+\Function{iConectadas?}{in r: estr\_red, in c1: hostname, in c2: hostname}{$\rightarrow$ res: bool}
+	\State it $\gets$ CrearIt(Significado(r,c1).conexiones) \Comment{O(n)}
+	\State res $\gets$ FALSE \Comment{O(1)}
+	\While{HaySiguiente(it) $\&\&$ $\neg$res} \Comment{Guarda: O(1)} \Comment{El ciclo se ejecuta a lo sumo n-1 veces} \Comment{O(n)}
+		\If{SiguienteClave(it)==c2} \Comment{O(L)}
+			\State res $\gets$ TRUE
+		\EndIf
+		\State Avanzar(it) \Comment{O(1)}
+	\EndWhile
+\EndFunction \Comment{\textbf{O(n*L)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de InterfazUsada}
+\begin{algorithmic}[0]
+\Function{iInterfazUsada}{in r: estr\_red, in c1: hostname, in c2: hostname}{$\rightarrow$ res: interfaz}
+	\State it $\gets$ CrearIt(significado(r,c1).conexiones) \Comment{O(n)}
+	\While{HaySiguiente(it)} \Comment{Guarda: O(1)} \Comment{El ciclo se ejecuta a lo sumo n-1 veces} \Comment{O(n)}
+		\If{SiguienteSignificado(it)==c2} \Comment{O(L)}
+			\State res $\gets$ SiguienteClave(it) \Comment{nat por copia} \Comment{O(copiar(nat))}
+		\EndIf
+		\State Avanzar(it) \Comment{O(1)}
+	\EndWhile
+\EndFunction \Comment{\textbf{O(n*L)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de IniciarRed}
+\begin{algorithmic}[0]
+\Function{iIniciarRed()}{}{$\rightarrow$ res: estr\_red}
+	\State res $\gets$ Vacio() \Comment{Diccionario} \Comment{O(1)}
+\EndFunction \Comment{\textbf{O(1)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de AgregarCompu}
+\begin{algorithmic}[0]
+\Function{iAgregarCompu}{inout r: estr\_red, in c1: compu}{}
+	\State nuevoDiccVacio $\gets$ Vacio() \Comment{Diccionario} \Comment{O(1)}
+	\State DefinirRapido(r, c1.ip, tupla(Copiar(c1.interfaces), nuevoDiccVacio, nuevoDiccVacio)) \Comment{O(Copiar(sL) + Copiar(conj(interfaz)) con sL=string de largo L}
+\EndFunction \Comment{\textbf{O(L + i) con i=cantidad de interfaces}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Conectar}
+\begin{algorithmic}[0]
+\Function{iConectar}{inout r: estr\_red, in c1: hostname, int i1:interfaz, in c2: hostname, in i2:interfaz}{}
+\comentario{Actualizo conexiones de ambas}
+\State DefinirRapido(Significado(r, c1).conexiones, i1, c2) \Comment{O(n) + O(L) + O(copiar(nat))}
+\State DefinirRapido(Significado(r, c2).conexiones, i2, c1) \Comment{O(n) + O(L) + O(copiar(nat))} 
+\comentario{Actualizo caminos de ambas}
+\State ActualizarCaminos(r, c1, c2) \Comment{O(n$^{4}$ + n$^{3}$ x L)}
+\State ActualizarCaminos(r, c2, c1) \Comment{O(n$^{4}$ + n$^{3}$ x L)}
+\comentario{Creo conjunto con los actualizados hasta el momento}
+\State actualizados $\gets$ Vacio() \Comment{conjunto}
+\State AgregarRapido(actualizados, c1) \Comment{O(L)}
+\State AgregarRapido(actualizados, c2) \Comment{O(L)}
+\comentario{Actualizo caminos del resto de la Red por recursion}
+\State ActualizarVecinos(r, c1, actualizados)  \Comment{O(n$^{6}$ + n$^{5}$ * L)}
+\EndFunction \Comment{O(n$^{6}$ + n$^{5}$ * L)}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de funci\'on auxiliar Actualizar Caminos}
+\begin{algorithmic}[0]
+\Function{iActualizarCaminos}{inout r: estr\_red, in c1: hostname, in c2: hostname}{}
+\comentario{Actualiza los caminos de c1 con los de c2}
+\comentario{Recorro los alcanzables de c2}
+\State itAlcanzables2 $\gets$ crearIt(Significado(r, c2).alcanzables) \Comment{O(n)}
+\While {(HaySiguiente(itAlcanzables2)} \Comment{se ejecuta a lo sumo n-1 veces} \Comment{O(n) x}
+	\comentario{Recorro alcanzables de c1}
+	\State itAlcanzables1 $\gets$ crearIt(Significado(r, c1).alcanzables) \Comment{O(n)}
+	\While{(HaySiguiente(itAlcanzables1))} \Comment{se ejecuta a lo sumo n-1 veces} \Comment{O(n) x}
+		\If{(SiguienteClave(itAlcanzables2) == SiguienteClave(itAlcanzables1))} \Comment{O(L)}
+			\comentario{El alcanzable ya estaba, me fijo que caminos son m\'as cortos}
+			\State itCaminos $\gets$ crearIt (SiguienteSignificado(itAlcanzables2)) \Comment{O(1)}
+			\State camino2 $\gets$ Siguiente(itCaminos) \Comment{camino minimo del c2} \Comment{O(n)}
+			\State itCaminos $\gets$ crearIt (SiguienteSignificado(itAlcanzables1)) \Comment{O(1)}
+			\State camino1 $\gets$ Siguiente(itCaminos) \Comment{camino minimo del c1} \Comment{O(n)}
+			
+			\If{(longitud(camino1) > longitud(camino2))} \Comment{cada camino tiene a lo sumo n elementos} \Comment{O(1)}
+				\comentario{Los caminos nuevos son mas cortos, borro los que están y copio los nuevos}
+				\State Borrar(Significado(r, c1).alcanzables, SiguienteClave(itAlcanzables1)) \Comment{O(n)}
+				\comentario{Nuevo alcanzable: me copio los caminos agregando c1 al principio}
+				\State itCaminos $\gets$ crearIt (SiguienteSignificado(itAlcanzables2)) \Comment{O(1)}
+				\State caminos $\gets$ Vacio() \Comment{conjunto donde voy a guardar los caminos modificados} \Comment{O(1)}
+				\While { (HaySiguiente(itCaminos))} \Comment{O(n) x}
+					\State nuevoCamino $\gets$ copy(Siguiente(itCaminos)) \Comment{copio el camino que voy a modificar} \Comment{O(n)}
+					\State AgregarAdelante(nuevoCamino, c1) \Comment{O(L)}
+					\State AgregarRapido (caminos, nuevoCamino) \Comment{O(n)}
+					\State Avanzar(itCaminos) \Comment{O(1)}
+				\EndWhile  \Comment{O(n x (n + L))}
+				\comentario {agrego el nuevo alcanzable con el camino}
+				\State DefinirRapido(Significado(r,c1).alcanzables, SiguienteClave(itAlcanzables2), caminos) \Comment{O(n) + O(L)}
+			
+			\Else 
+				\If {(longitud(camino1) == longitud(camino2))} \Comment{O(1)}
+					\comentario{ Tengo que agregar los nuevos caminos (modificados) al conjunto de caminos actual}
+					\State itCaminos $\gets$ crearIt(SiguienteSignificado(itAlcanzables2)) \Comment{O(1)}
+					\While {(HaySiguiente(itCaminos))} \Comment{O(n) x}
+						\State nuevoCamino $\gets$ copy(Siguiente(itCaminos)) \Comment {copio el camino que voy a modificar} \Comment{O(n)}
+						\State AgregarAdelante(nuevoCamino, c1) \Comment{O(L)}
+						\State Agregar(SiguienteSignificado(itAlcanzables1), nuevoCamino) \Comment{O(n)}
+						\State Avanzar(itCaminos) \Comment{O(1)}
+					\EndWhile  \Comment{O(n x (n + L))}
+				\EndIf
+			\EndIf
+		\Else
+			\comentario{Nuevo alcanzable : me copio los caminos agregando c1 al principio}
+			\State itCaminos $\gets$ crearIt (SiguienteSignificado(itAlcanzables2)) \Comment{O(1)}
+			\State caminos $\gets$ Vacio() \Comment{conjunto donde voy a guardar los caminos modificados} \Comment{O(1)}
+			\While { (HaySiguiente(itCaminos))}\Comment{O(n) x}
+				\State nuevoCamino $\gets$ copy(Siguiente(itCaminos)) \Comment{copio el camino que voy a modificar} \Comment{O(n)}
+				\State AgregarAdelante(nuevoCamino, c1) \Comment{O(L)}
+				\State AgregarRapido (caminos, nuevoCamino)\Comment{O(n)}
+				\State Avanzar(itCaminos) \Comment{O(1)}
+			\EndWhile  \Comment{O(n x (n + L))}
+%			\comentario {agrego el nuevo alcanzable con el camino}
+			\State DefinirRapido(Significado(r, c1).alcanzables, SiguienteClave(itAlcanzables2), caminos)
+		\EndIf
+		
+			
+	\algstore {actualizarcaminos}						
+
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+\begin{algorithmic}[0]
+
+	\algrestore {actualizarcaminos}
+	
+		\State Avanzar(itAlcanzables1) \Comment{O(1)}
+	\EndWhile  \Comment{O(n x (n + (n x (n + L))) )}
+	\State Avanzar(itAlcanzables2)\Comment{O(1)}
+\EndWhile {O(n + n x (n x (n + (n x (n + L)))}
+\EndFunction \Comment{O(n$^{4}$ + n$^{3}$ x L)}
+\end{algorithmic}
+\end{algorithm}		
+				
+				
+\begin{algorithm}
+\caption{Implementaci\'on de funci\'on auxiliar Actualizar Vecinos}
+\begin{algorithmic}[0]
+\Function{iActualizarVecinos}{inout r: estr\_red, in c1: hostname, in actualizados: conj(hostname) }{}
+\comentario{Actualiza los caminos de los vecinos de C, y luego hace recursion para los vecinos de los vecinos.}
+\State itVecinos $\gets$ crearIt(Significado(r, c1).conexiones) \Comment{O(n)}
+\While{ ( HaySiguiente(itVecinos) )} \Comment{O(n x)}
+	\comentario{ Si todavía no fue actualizado, lo actualizo y hago recursi\'on sobre los vecinos.}
+	\If{(SiguienteClave(itVecinos) $\notin$ actualizados)} \Comment{O(n x L)}
+		\State ActualizarCaminos(r, SiguienteClave(itVecinos), c )  \Comment{O(n$^{4}$ + n$^{3}$ x L)}
+		\State AgregarRapido (actualizados, SiguienteClave(itVecinos)) \Comment{O(L)}
+		\State ActualizarVecinos(r, SiguienteClave(itVecinos), actualizados) 
+		\Comment{recursi\'on hasta actualizar las n computadoras, O(n) x}
+	\EndIf
+\State Avanzar(itVecinos) \Comment{O(1)}
+\EndWhile
+\EndFunction \Comment{O(n$^{6}$ + n$^{5}$ * L)}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Vecinos}
+\begin{algorithmic}[0]
+\Function{iVecinos}{inout r: estr\_red, in c1: hostname}{$\rightarrow$ res: conj(hostname)}
+	\State it $\gets$ CrearIt(Significado(r,c1).conexiones) \Comment{O(1) + O(n)}
+	\State res $\gets$ Vacio() \Comment{Conjunto} \Comment{O(1)}
+	\While{HaySiguiente(it)} \Comment{Guarda: O(1)} \Comment{El ciclo se ejecuta a lo sumo n-1 veces} \Comment{O(n)}
+		\State AgregarRapido(res, SiguienteSignificado(it)) \Comment{O(L)}
+		\State Avanzar(it) \Comment{O(1)}
+	\EndWhile
+\EndFunction \Comment{\textbf{O(n*L)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de UsaInterfaz}
+\begin{algorithmic}[0]
+\Function{iUsaInterfaz}{in r: estr\_red, in c: hostname, in i: interfaz}{$\rightarrow$ res: bool}
+	\State res $\gets$ Definido?(Significado(r,c).conexiones,i) \Comment{O(comparar(nat)*n)}
+\EndFunction \Comment{\textbf{O(n)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de CaminosMinimos}
+\begin{algorithmic}[0]
+\Function{iCaminosMinimos}{in r: estr\_red, in c1: hostname, in c2: hostname}{$\rightarrow$ res: conj(lista(hostname))}
+	\State itCaminos $\gets$ crearIt(Significado(Significado(r,c1).alcanzables, c2)) \Comment{O(1) + O(L*n)}
+	\State res $\gets$ Vacio() \Comment{Conjunto} \Comment{O(1)}
+	\While{HaySiguiente(itCaminos)}
+		\State AgregarRapido(res, Siguiente(itCaminos)) \Comment{O(1)}
+		\State Avanzar(itCaminos) \Comment{O(1)}	
+	\EndWhile
+\EndFunction \Comment{\textbf{O(n*L)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de HayCamino?}
+\begin{algorithmic}[0]
+\Function{iHayCamino?}{in r: estr\_red, in c1: hostname, in c2: hostname}{$\rightarrow$ res: bool}
+	\State res $\gets$ Definido?(Significado(r,c1).alcanzables, c2) \Comment{O(n*n)}
+\EndFunction \Comment{\textbf{O(n*n)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de ==}
+\begin{algorithmic}[0]
+\Function{iIgualdad}{in r1: estr\_red, in r2: estr\_red}{$\rightarrow$ res: bool}
+	\State res $\gets$ TRUE	\Comment{O(1)}
+	\If{$\neg$($\#$Claves(r1)==$\#$Claves(r2))} \Comment{O(comparar(nat))}
+\comentario{Si la cantidad de claves son distintas => las redes son distintas}
+		\State res $\gets$ FALSE \Comment{O(1)}
+	\Else
+		\State itRed1 $\gets$ CrearIt(r1) \Comment{O(1)}
+		\While{HaySiguiente(itRed1) $\&\&$ res} \Comment{Guarda: O(1)} \Comment{Se ejecuta n veces} \Comment{O(n)}
+\comentario{Recorro la red 1 y me fijo para cada una de sus computadoras}
+			\If{$\neg$(Definido?(r2, SiguienteClave(itRed1))} \Comment{O(L*n)}
+\comentario{Si no está definido su hostname en la red 2 => las redes son distintas}
+				\State res $\gets$ FALSE \Comment{O(1)}
+			\Else
+				\State Compu2 $\gets$ Significado(r2,SiguienteClave(itRed1)) \Comment{O(L*n)}
+				\State Compu1 $\gets$ SiguienteSignificado(itRed1) \Comment{O(1)}
+\comentario{Tomo las computadoras de red 1 y red 2 con el mismo hostname y las comparo}
+				\If{$\neg$(Comp1.interfaces == Comp2.interfaces)} \Comment{O(m*m) con m=cantidad de interfaces}
+\comentario{Si sus interfaces son distintas => las redes son distintas}
+					\State res $\gets$ FALSE \Comment{O(1)}
+				\EndIf
+				
+				\If{$\neg$(Comp1.conexiones == Comp2.conexiones)}
+\comentario{Si sus conexiones son distintas => las redes son distintas}
+					\State res $\gets$ FALSE \Comment{O(1)}
+				\EndIf
+				\If{$\neg$($\#$Claves(Compu1.alcanzables)==$\#$Claves(Compu2.alcanzables))}
+\comentario{Si sus cantidades de alcanzables son distintas => las redes son distintas}
+					\State res $\gets$ FALSE \Comment{O(1)}
+				\Else
+					\State itAlc1 $\gets$ CrearIt(Compu1.alcanzables) \Comment{O(1)}
+					\While{HaySiguiente(itAlc1) $\&\&$ res} \Comment{se ejecuta a lo sumo n$-$1 veces} \Comment{O(n)}
+\comentario{Para cada alcanzable de la computadora de la red 1}
+						\If{$\neg$(Definido?(Comp2.alcanzables, SiguienteClave(itAlc1)))} \Comment{O(m)}
+\comentario{Si no est\'a definida en los alcanzables de la compu de la red 2 => las redes son distintas}
+							\State res $\gets$ FALSE
+						\Else
+							\State Caminos1 $\gets$ SiguienteSignificado(itAlc1) \Comment{O(1)}
+							\State Caminos2 $\gets$ Significado(Comp2.alcanzables, itAlc1) \Comment{O(n)}
+\comentario{Me guardo los 2 conjuntos de caminos (de la compu de la red 1 y la de la red 2)}
+							
+	\algstore {igualdadRed}						
+
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+\begin{algorithmic}[0]
+
+\algrestore {igualdadRed}					
+					\If{$\neg$(Longitud(Caminos1) == Longitud(Caminos2))} \Comment{O(comparar(nat))}
+\comentario{Si sus cantidades son distintas => las redes son distintas}
+								\State res $\gets$ FALSE
+							\Else
+								\State itCaminos1 $\gets$ CrearIt(Caminos1) \Comment{O(1)}
+								\While{HaySiguiente(itCaminos1) $\&\&$ res}
+\comentario{Para cada camino en el conjunto de caminos de la compu de la red 1}
+\comentario{Recorro los caminos de la compu de la red 2}
+									\State itCaminos2 $\gets$ CrearIt(Caminos2) \Comment{O(1)}
+									\State noEncontro $\gets$ TRUE \Comment{O(1)}
+									\While{HaySiguiente(itCaminos2) $\&\&$ noEncontro}
+\comentario{Busco que el camino de la compu de la red 1 est\'e en la compu de la red 2}
+										\If{Siguiente(itCaminos2) == Siguiente(ItCaminos1)}
+											\State noEncontro $\gets$ FALSE
+										\EndIf
+										\State Avanzar(itCaminos2) \Comment{O(1)}
+									\EndWhile
+									\If{noEncontro} \Comment{O(1)}
+\comentario{Si no encontr\'o alguno => las redes son distintas}
+										\State res $\gets$ FALSE \Comment{O(1)}
+									\EndIf
+									\State Avanzar(itCaminos1) \Comment{O(1)}
+								\EndWhile
+							\EndIf
+						\EndIf
+						\State Avanzar(itAlc1) \Comment{O(1)}
+					\EndWhile
+				\EndIf
+			\EndIf
+			\State Avanzar(itRed1) \Comment{O(1)}
+		\EndWhile
+	\EndIf
+\EndFunction \Comment{\textbf{O(n*n * ( L + n*n + m ) + n*m*m)}}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Copiar}
+\begin{algorithmic}[0]
+\Function{iCopiar}{in r: estr\_red}{$\rightarrow$ res: red}
+	\State res $\gets$ IniciarRed() \Comment{O(1)}
+\comentario{Crea una red vacia.}
+	\State itRed $\gets$ CrearIt(r) \Comment{O(1)}
+	\While{HaySiguiente(itRed)} \Comment{O(1)} \Comment{se ejecuta n veces} \Comment{O(n)}
+\comentario{Para cada computadora en la red original.}
+		\State copiaAlcanzables $\gets$ Vacio() \Comment{diccionario} \Comment{O(1)}
+\comentario{Inicia los alcanzables en vacio.}
+		\State itAlcanzables $\gets$ CrearIt(SiguienteSignificado(itRed).alcanzables) \Comment{O(1)}
+		\While{HaySiguiente(itAlcanzables)} \Comment{Guarda: O(1)} \Comment{se ejecuta a lo sumo n veces} \Comment{O(n)}
+\comentario{Para cada conjunto de caminos m\'inimos (cada destino).}
+			\State copiaCaminos $\gets$ Vacia() \Comment{lista} \Comment{O(1)}
+\comentario{Inicia el conjunto de caminos m\'inimos como vac\'io.}
+			\State itCaminos $\gets$ CrearIt(SiguienteSignificado(itAlcanzables)) \Comment{O(1)}
+			\While{HaySiguiente(itCaminos)}
+\comentario{Para cada camino en el conjunto original.}
+				\State AgregarAdelante(copiaCaminos, Siguiente(itCaminos)) \Comment{O(copiar(camino))}
+\comentario{Copia el camino original y lo agrega adelante del conjunto de caminos m\'inimos.}
+				\State Avanzar(itCaminos) \Comment{O(1)}
+			\EndWhile			
+			\State Definir(copiaAlcanzables, SiguienteClave(itAlcanzables), copiaCaminos)
+\comentario{Define el destino y sus caminos m\'inimos en la copia de alcanzables.}
+			\State Avanzar(itAlcanzables) \Comment{O(1)}
+		\EndWhile
+		\State Definir(res, SiguienteClave(itRed), Tupla(Copiar(SiguienteSignificado(itRed).interfaces), Copiar(SiguienteSignificado(itRed).conexiones), copiaAlcanzables))
+\comentario{Define la copia de la computadora con los campos antes copiados.}
+		\State Avanzar(itRed) \Comment{O(1)}
+	\EndWhile
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\end{Algoritmos}
+
+\newpage
+
+

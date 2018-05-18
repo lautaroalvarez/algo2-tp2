@@ -1,0 +1,282 @@
+\begin{Interfaz}
+  
+  \textbf{usa}: \tadNombre{Bool, Nat}.
+  
+  \textbf{se explica con}: \tadNombre{Diccionario($\kappa, \sigma$)}.
+
+  \textbf{g\'eneros}: \TipoVariable{diccLog($\kappa, \sigma$)}.
+
+  \Titulos{Operaciones}
+
+  \InterfazFuncion{Definido?}{\In{d}{diccLog($\kappa, \sigma$)}, \In{c}{$\kappa$}}{Bool}
+  {res $\igobs$ def?(c,d)}%
+  [$O(log(n) * comparar(\kappa))$]
+
+  \InterfazFuncion{Significado}{\In{d}{diccLog($\kappa, \sigma$)}, \In{c}{$\kappa$}}{$\sigma$}
+  [def?(c,d)]
+  {res $\igobs$ obtener(c,d)}%
+  [$O(log(n) * comparar(\kappa) + copiar(\sigma)$]
+  
+  \InterfazFuncion{Vacio}{}{diccLog($\kappa, \sigma$)}
+  {res $\igobs$ vacio()}%
+  [$O(1)$]
+  
+  \InterfazFuncion{Definir}{\Inout{d}{diccLog($\kappa, \sigma$)}, \In{c}{$\kappa$}, \In{s}{$\sigma$}}{}
+  [$\neg$def?(c,d) $\wedge$ d=d$_0$]
+  {d=definir(c,d$_0$)}%
+  [O(log(n))]
+  
+  \InterfazFuncion{Borrar}{\Inout{d}{diccLog($\kappa, \sigma$)}, \In{c}{$\kappa$}}{}
+  [def?(c,d) $\wedge$ d=d$_0$]
+  {d=borrar(c,d$_0$)}%
+  [$O(log(n) * comparar(\kappa) + max(borrar(\kappa), borrar(\sigma)) + max(copiar(\kappa), copiar(\sigma)))$]
+
+\end{Interfaz}
+
+\newpage 
+
+\begin{Representacion}
+
+\begin{Estructura}{diccLog}[$estr$: $ab$($clave$: $\kappa$, $nivel$: nat, $significado$: $\sigma$)]
+ 
+\comentario{De aqu\'i en adelante, para el rep y abs, por cuestiones de brevedad y legibilidad se referir\'a al primer elemento del \'arbol binario (arb.primero) simplemente como primero; al nivel de cada nodo (nodo.prio.nivel) como nodo.nivel; a la clave de cada nodo (nodo.prio.clave) como nodo.clave; al significado de cada nodo (nodo.valor) como nodo.significado; a cada nodo(tupla($\kappa$, nat), $\sigma$) como nodo($\kappa$, $\sigma$.}
+
+\comentario{La estructura utilizada para representar al diccionario Logaritmico es un AA tree. Es un tipo de ABB auto-balanceado que provee busqueda, insercion y borrado
+en tiempo logaritmico. Los AA trees son similares a los Red-Black Trees, pero solo pueden tener hijos derechos ``rojos'' (en vez de utilizar un valor booleano de color, usan un valor entero de nivel;
+los hijos ``rojos'' son los que tienen mismo nivel que sus padres), lo que reduce considerablemente la cantidad de operaciones necesarias para mantener el arbol.}
+\comentario{http://user.it.uu.se/$\sim$arnea/abs/simp.html}
+% http://user.it.uu.se/~arnea/abs/simp.html
+   
+\end{Estructura}
+
+\comentario{Rep en castellano:}
+\comentario{Se sigue cumpliendo el invariante del \'Arbol Binario}
+\comentario{1: Las claves de todos los elementos del sub-\'arbol izquierdo de un nodo son menores que la suya. Las claves de todos los elementos del sub-\'arbol derecho de un nodo son mayores que la suya.}
+\comentario{2: El nivel de toda hoja es 1.}
+\comentario{3: El nivel de cada hijo izquierdo es exactamente 1 menos que el de su padre.}
+\comentario{4: El nivel de cada hijo derecho es igual o 1 menos que el de su padre.}
+\comentario{5: El nivel de cada nieto derecho (hijo derecho del hijo derecho de un nodo) es estrictamente menor que el de su abuelo.}
+\comentario{6: Cada nodo con nivel (estrictamente) mayor a 1 tiene dos hijos.}
+
+
+$\ $ \newline $\ $
+\par Rep: estr $\rightarrow$ bool
+\newline \indent Rep($e$) $\equiv$ true $\iff$ 
+\comentario{1} $((\forall n_1, n_2:\ nodo(\kappa, \sigma))(\ n_1 \in\ arbol(e) \wedge \ n_2 \in\ arbol(e) \Rightarrow_L\ (n_1 \in arbol(n_2.izquierdo) \Rightarrow n_1.clave < n_2.clave) \wedge\ (n_1 \in arbol(n_2.derecho) \Rightarrow n_1.clave > n_2.clave) \wedge$
+\comentario{2} $((\forall n:\ nodo(\kappa, \sigma))(\ n \in\ arbol(e) \wedge n.izquierdo = NULO \wedge n.derecho = NULO \Rightarrow\ n.nivel = 1) \wedge$
+\comentario{3} $((\forall n:\ nodo(\kappa, \sigma))(\ n \in\ arbol(e) \wedge n.izquierdo \neq NULO \Rightarrow\ (n.izquierdo).nivel = n.nivel-1) \wedge$
+\comentario{4} $((\forall n:\ nodo(\kappa, \sigma))(\ n \in\ arbol(e) \wedge n.derecho \neq NULO \Rightarrow ((n.derecho).nivel = n.nivel-1 \vee\ (n.derecho).nivel = n.nivel)) \wedge$
+\comentario{5} $((\forall n:\ nodo(\kappa, \sigma))(\ n \in\ arbol(e) \wedge n.derecho \neq NULO \wedge_L (n.derecho).derecho \neq NULO \Rightarrow_L ((n.derecho).derecho).nivel < n.nivel) \wedge$
+\comentario{6} $((\forall n:\ nodo(\kappa, \sigma))(\ n \in\ arbol(e) \wedge n.nivel > 1 \Rightarrow\ (n.izquierdo \neq NULO \wedge n.derecho \neq NULO)$
+
+
+$\ $ \newline $\ $
+\par Abs: $estr d \rightarrow\ dicc(\kappa, \sigma)$ \{Rep($d$) \}
+$\ $\newline \indent Abs($d$) $\equiv$ c: dicc($\kappa, \sigma$) | $((\forall k:\ \kappa)(\ k \in claves(c) \Rightarrow (\exists n:\ estr(\kappa, \sigma))( n \in arbol(d)\wedge n.clave = k)) \wedge
+\newline \indent ((\forall n:\ nodo(\kappa, \sigma))( n \in arbol(d) \Rightarrow\ n.clave \in claves(c)))) \wedge_L
+\newline \indent (\forall n:\ nodo(\kappa, \sigma))( n \in arbol(d) \Rightarrow\ obtener(c,n.clave) =_{obs} n.significado)$
+
+\newpage
+
+\indent \textbf{Especificaci\'on de las operaciones auxiliares utilizadas para Rep y Abs}
+\newline \indent arbol:$\ puntero(nodo(\kappa\, \sigma)) \rightarrow conj(puntero(nodo(\kappa,\sigma)))$
+
+\tadAxioma{arbol(n)}{
+\IF {$n.izq \neq null \wedge n.der \neq null$}
+THEN {Ag($\&n,arbol(n.izq)\cup arbol(n.der)$)}
+ELSE { \IF {$n.izq \neq null$}
+		THEN {Ag($\&n,arbol(n.izq)$)}
+		ELSE { \LIF\ $n.der \neq null$ \LTHEN\ Ag($\&n,arbol(n.der)$) \LELSE\ Ag($\&n,\emptyset$) \LFI}
+		FI}
+FI}
+
+\end{Representacion}
+
+\newpage
+
+\begin{Algoritmos}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Definido?}
+\begin{algorithmic}[0]
+\Function{iDefinido?}{in d: estr , in c: $\kappa$}{$\rightarrow$ res: bool}
+	\comentario{B\'usqueda est\'andar en un ABB}
+	\State nodoActual $\gets$ d \Comment{O(1)}
+	\State res $\gets$ FALSE \Comment{O(1)}
+	\While{$\neg$nil?(nodoActual) $\&\&$ $\neg$res} \Comment{El ciclo se ejecuta en el peor caso una cantidad de veces igual a la altura del arbol. Al ser auto-balanceado, su altura siempre sera O(log(n))}
+		\If{$\pi_1$(raiz(nodoActual)) == c} \Comment{O(comparar($\kappa$))}
+			\State res $\gets$ TRUE \Comment{O(1)}
+		\Else
+			\If{c < $\pi_1$(raiz(nodoActual))} \Comment{O(comparar($\kappa$))}
+				\State nodoActual $\gets$ izq(nodoActual) \Comment{O(1)}
+			\Else
+				\State nodoActual $\gets$ der(nodoActual) \Comment{O(1)}
+			\EndIf
+		\EndIf
+	\EndWhile
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Significado}
+\begin{algorithmic}[0]
+\Function{iSignificado}{in d: estr , in c: $\kappa$}{$\rightarrow$ res: $\sigma$}
+	\comentario{B\'usqueda est\'andar en un ABB}
+	\State nodoActual $\gets$ d \Comment{O(1)}
+	\While{$\neg$nil?(nodoActual) $\&\&$ $\neg$res} \Comment{El ciclo se ejecuta en el peor caso O(log(n)) veces.}
+		\If{$\pi_1$(raiz(nodoActual)) == c} \Comment{O(comparar($\kappa$))}
+			\State res $\gets$ $\pi_3$(raiz(nodoActual)) \Comment{O(copiar($\sigma$)). Esta operacion solo se ejecuta una vez (implica $\neg$guarda del ciclo que la contiene).}
+		\Else
+			\If{c < $\pi_1$(raiz(nodoActual))} \Comment{O(comparar($\kappa$))}
+				\State nodoActual $\gets$ izq(nodoActual) \Comment{O(1)}
+			\Else
+				\State nodoActual $\gets$ der(nodoActual) \Comment{O(1)}
+			\EndIf
+		\EndIf
+	\EndWhile
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Vacio}
+\begin{algorithmic}[0]
+\Function{iVacio}{}{$\rightarrow$ res: estr}
+	\State res $\gets$ nil() \Comment{O(1)}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Definir}
+\begin{algorithmic}[0]
+\Function{iDefinir}{inout d: estr , in c: $\kappa$, in s: $\sigma$}{}
+	\comentario{Si ya se llego a una hoja, se inserta el nuevo elemento}
+	\If{nil?(d)} \Comment{O(1)}
+		\State $res\gets \ <c, NULO, NULO, s, 1>$ \Comment{O(max(copiar($\kappa$), copiar($\sigma$))}
+	\comentario{Se busca la posicion correspondiente al nuevo nodo (antes de rebalancear el arbol).}
+	\ElsIf{c < $\pi_1$(raiz(d))} \Comment{O(comparar($\kappa$)}
+		\State setearIzq(d, iDefinir(izquierdo(d),c,s)) \Comment{En el peor caso se llama recursivamente a la funcion una cantidad de veces igual a la altura
+		del arbol, que es O(log(n)).}
+	\ElsIf{c > $\pi_1$(raiz(d))} \Comment{O(comparar($\kappa$))}
+		\State setearDer(d, iDefinir(d.derecho,c,s)) \Comment{En el peor caso se llama recursivamente a la funcion una cantidad de veces igual a la altura
+		del arbol, que es O(log(n)).}
+	\EndIf
+	\comentario{Se tuerce y divide el arbol en cada nivel, rebalanceandolo.}
+	\State d $\gets$ Torsion(d) \Comment{O(1)}
+	\State d $\gets$ Division(d) \Comment{O(1)}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Torsion}
+\begin{algorithmic}[0]
+\Function{iTorsion}{in d: estr}{$\rightarrow$ res: estr}
+	\comentario{Si el nodo tiene un hijo izquierdo del mismo nivel se debe realizar una rotacion para restaurar el invariante.}
+	\If{nil?(d) $\|$ nil?(izq(d))} \Comment{O(1)}
+		\State res $\gets$ d \Comment{O(1)}
+	\Else
+	\comentario{El hijo izquierdo de mismo nivel pasa a ser el padre del nodo derecho. El hijo derecho del nodo izquierdo pasa a ser el hijo izquierdo del nodo derecho.}
+		\If{$\pi_2$(raiz(izq(d))) == $\pi_2$(d)} \Comment{O(1)}
+			\State nodoAux $\gets$ izq(d) \Comment{O(1)}
+			\State setearIzq(d, der(nodoAux)) \Comment{O(1)}
+			\State setearDer(nodoAux, d) \Comment{O(1)}
+			\State res $\gets$ nodoAux \Comment{O(1)}
+		\Else
+			\State res $\gets$ d \Comment{O(1)}
+		\EndIf
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Division}
+\begin{algorithmic}[0]
+\Function{iDivision}{in d: estr}{$\rightarrow$ res: estr}
+	\comentario{Si hay dos hijos derechos del mismo nivel que el padre se debe realizar una rotacion para restaurar el invariante.}
+	\If{nil?(d) $\|$ nil?(der(d)) $\|$ nil?(der(der(d)))} \Comment{O(1)}
+		\State res $\gets$ d \Comment{O(1)}
+	\Else
+	\comentario{El primero hijo derecho pasa a ser el padre, con un nivel mas. Su hijo izquierdo pasa a ser el hijo derecho de su padre original.}
+		\If{(d.derecho.derecho).nivel == d.nivel} \Comment{O(1)}
+			\State nodoAux $\gets$ der(d) \Comment{O(1)}
+			\State setearDer(d, izq(nodoAux)) \Comment{O(1)}
+			\State setearIzq(nodoAux, d) \Comment{O(1)}
+			\State $\pi_2$(raiz(nodoAux)) $\gets$ $\pi_2$(raiz(nodoAux))++ \Comment{O(1)}
+			\State res $\gets$ nodoAux \Comment{O(1)}
+		\Else
+			\State res $\gets$ d \Comment{O(1)}
+		\EndIf
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\FloatBarrier
+\end{Algoritmos}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Borrar}
+\begin{algorithmic}[0]
+\Function{iBorrar}{inout d: estr, in c: $\kappa$}{}
+	\If{nil?(d)} \Comment{O(1)}
+		\State $endFunction$
+	\comentario{Se busca recursivamente la posicion del elemento a borrar mediante una busqueda estandar en ABB.}
+	\ElsIf{c > $\pi_1$(raiz(d))} \Comment{O(comparar($\kappa$))}
+		\State setearDer(d, iBorrar(der(d), c)) \Comment{En el peor caso se llama recursivamente a la funcion una cantidad de veces igual a la altura
+		del arbol, que es O(log(n)).}
+	\ElsIf{c < $\pi_1$(raiz(d))} \Comment{O(comparar($\kappa$))}
+		\State setearIzq(d, iBorrar(izq(d), c)) \Comment{En el peor caso se llama recursivamente a la funcion una cantidad de veces igual a la altura
+		del arbol, que es O(log(n)).}
+	\comentario{Si el elemento a borrar es una hoja, simplemente se lo borra.}
+	\ElsIf{nil?(izq(d)) $\wedge$ nil?(der(d))} \Comment{O(1)}
+		\State $borrar(d)$ \Comment{O(max(borrar($\kappa$), borrar($\sigma$)))}
+		\State $d\gets\ NULO$ \Comment{O(1)}
+	\comentario{Si el elemento a borrar no es una hoja, se reduce al caso hoja.}
+	\ElsIf{nil?(izq(d))} \Comment{O(1)}
+	\comentario{Se busca el sucesor del elemento (bajando una vez por la rama izquierda y luego por la derecha hasta encontrar una hoja).}
+		\State aux $\gets$ der(d) \Comment{O(1)}
+		\While{$\neg$nil?(izq(aux))} \Comment{En el peor caso el ciclo se ejecuta O(log(n)) veces.}
+			\State aux $\gets$ izq(aux) \Comment{O(1)}
+		\EndWhile
+		\comentario{Se hace un swap y se elimina el elemento.}
+		\State setearDer(d, iBorrar($\pi_1$(raiz(aux)), der(d)))
+		\State $\pi_1$(raiz(d)) $\gets$ $\pi_1$(raiz(aux)) \Comment{O(copiar($\kappa$))}
+		\State $\pi_3$(raiz(d)) $\gets$ $\pi_3$(raiz(aux)) \Comment{O(copiar($\sigma$))}
+	\Else
+	\comentario{Se busca el predecesor del elemento (bajando una vez por la rama derecha y luego por la izquierda hasta encontrar una hoja).}
+		\State aux $\gets$ izq(d) \Comment{O(1)}
+		\While{$\neg$nil?(der(aux))} \Comment{En el peor caso el ciclo se ejecuta O(log(n)) veces.}
+			\State aux $\gets$ der(aux) \Comment{O(1)}
+		\EndWhile
+		\comentario{Se hace un swap y se elimina el elemento.}
+		\State setearIzq(d, iBorrar($\pi_1$(raiz(aux)), izq(d)))
+		\State $\pi_1$(raiz(d)) $\gets$ $\pi_1$(raiz(aux)) \Comment{O(copiar($\kappa$))}
+		\State $\pi_3$(raiz(d)) $\gets$ $\pi_3$(raiz(aux)) \Comment{O(copiar($\sigma$))}
+	\EndIf
+	\comentario{Se nivela, divide y tuerce para restaurar el invariante.}
+	\State d $\gets$ Nivelar(T) \Comment{O(1)}
+	\State d $\gets$ Torsion(T) \Comment{O(1)}
+	\If{$\neg$nil?(der(d))} \Comment{O(1)}
+		\State setearDer(der(d), Torsion(der(der(d))) \Comment{O(1)}
+	\EndIf
+	\State d $\gets$ Division(T) \Comment{O(1)}
+	\State setearDer(d, Division(der(d)) \Comment{O(1)}
+	\State res $\gets$ d \Comment{O(1)}
+\EndFunction
+\Procedure{Nivelar}{inout d: estr}{}
+	\State nivel\_correcto $\gets$ min($\pi_2$(raiz(izq(d))), $\pi_2$(raiz(der(d))))+1 \Comment{O(1)}
+	\If{nivel\_correcto < $\pi_2$(raiz(d))} \Comment{O(1)}
+		\State $\pi_2$(raiz(d)) $\gets$ nivel\_correcto \Comment{O(1)}
+		\If{nivel\_correcto < $\pi_2$(raiz(der(d)))} \Comment{O(1)}
+			\State $\pi_2$(raiz(der(d))) $\gets$ nivel\_correcto \Comment{O(1)}
+		\EndIf
+	\EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+

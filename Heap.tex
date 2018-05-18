@@ -1,0 +1,260 @@
+\begin{Interfaz}
+
+  \textbf{usa}: \tadNombre{tupla,  nat, bool, $\alpha$}.
+  
+  \textbf{se explica con}: \tadNombre{Cola de Prioridad Alternativa}.
+
+  \textbf{g\'eneros}: \TipoVariable{colaLog($\alpha$)}.
+
+  \Titulos{Operaciones de Cola de Prioridad $_{HEAP}$}
+
+  \InterfazFuncion{Vacia}{}{colaLog($\alpha$)}
+  {res =$_{obs}$ vacia}%
+  [$O(1)$]
+  [Crea una cola vacia.]
+  []
+
+  \InterfazFuncion{Vacia?}{\In{estr}{colaLog($\alpha$)}}{bool}
+  {$res$ =$_{obs}$ vacia?($estr$)}%
+  [$O(1)$]
+  [Indica si la cola esta vacia.]
+  []
+
+  \InterfazFuncion{Pr\'oximo}{\In{estr}{colaLog($\alpha$)}}{tupla($nat, \alpha$)}
+  [$\neg Vacia?(estr)$]
+  {$res =_{obs} proximo(estr)$}%
+  [$O(copiar(\alpha))$]
+  [Devuelve una tupla que contiene al pr\'oximo elemento y su prioridad.]
+  
+
+  \InterfazFuncion{Encolar}{\Inout{estr}{colaLog($\alpha$)}, \In{prio}{nat}, \In{valor}{$\alpha$}}{bool} %res no me sirve para nada...lo puedo sacar o siempre tiene que estar aunque lo ponga siempre en true?
+  [estr = estr$_0$]
+  {$res$ $\wedge$ estr =$_{obs}$ encolar(estr$_0$)}%
+  [$O(log(n) + copiar(\alpha))$]
+  [Crea un nuevo elemento con los parametros dados y lo agrega a la cola.]
+  []
+
+  \InterfazFuncion{Desencolar}{\Inout{estr}{colaLog($\alpha$)}}{$\alpha$}
+  [estr = $estr_0 \ \wedge \neg Vacia?(estr)$] 
+  {estr =$_{obs}$ desencolar($estr_0$) $\wedge \ res =_{obs} proximo(estr_0)$}%
+  [$O(log(n) + copiar(\alpha) + borrar(\alpha))$]
+  [Devuelve al elemento de mayor prioridad y lo remueve de la cola. La cola no debe estar vac\'ia.]
+  []
+  
+  
+\end{Interfaz}
+
+\newpage
+
+\begin{tad}{\tadNombre{Cola de prioridad alternativa($\alpha$)}}
+\tadGeneros{colaPrio($\alpha$)}
+\tadExporta{colaPrio($\alpha$), generadores, observadores}
+\tadUsa{\tadNombre{Bool, Nat, Tupla}}
+
+\tadAlinearFunciones{desencolar}{nat,$\alpha$,colaPrior($\alpha$)}
+
+\tadObservadores
+\tadOperacion{vac\'ia?}{colaPrior($\alpha$)}{bool}{}
+\tadOperacion{pr\'oximo}{colaPrior($\alpha$)/c}{tupla($nat, \alpha$)}{$\neg$ vac\'ia?($c$)}
+\tadOperacion{desencolar}{colaPrior($\alpha$)/c}{colaPrior($\alpha$)}{$\neg$ vac\'ia?($c$)}
+
+\tadGeneradores
+\tadOperacion{vac\'ia}{}{colaPrior($\alpha$)}{}
+\tadOperacion{encolar}{nat,$\alpha$,colaPrior($\alpha$)}{colaPrior($\alpha$)}{}
+
+\tadAxiomas[\paratodo{colaPrior($\alpha$)}{c}, \paratodo{$\alpha$}{e}]
+\tadAlinearAxiomas{desencolar(encolar($p$, $e$, $c$))}{}
+
+\tadAxioma{vac\'ia?(vac\'ia)}{true}
+\tadAxioma{vac\'ia?(encolar($p$, $e$, $c$))}{false}
+
+\tadAxioma{pr\'oximo(encolar($p$, $e$, $c$))}{\textbf{if} vac\'ia?($c$) $\oluego$\ $\Pi_1(proximo(c)) < p$ \textbf{then} $<p,e>$ \textbf{else} \textbf{if} $\Pi_1(proximo(c)) = p$ \textbf{then} $<p,e>  \vee \ proximo(c)$ \textbf{else} $proximo(c)$ \textbf{fi} \textbf{fi}}
+\tadAxioma{desencolar(encolar($p$, $e$, $c$))}{\textbf{if} vac\'ia?($c$) $\oluego$\ $\Pi_1(proximo(c)) < p$ \textbf{then} $c$ \textbf{else} \textbf{if} $\Pi_1(proximo(c)) = p$ \textbf{then} $c\  \vee \ encolar(p, e, desencolar(c)$ \textbf{else}  $encolar(p, e, desencolar(c)$ \textbf{fi} \textbf{fi}}
+
+\end{tad}
+
+\newpage
+
+\begin{Representacion}
+
+\begin{Estructura}{colaLog($\alpha$)}[estr\_heap($\alpha$)]
+
+\begin{Tupla}[estr\_heap($\alpha$)]
+	\tupItem{size}{nat} \newline \nomoreitems
+	\tupItem{arb}{$ab$(tupla($prio$: nat, $valor$: $\alpha$, $padre$: ab($\alpha$)))} \newline \nomoreitems
+\end{Tupla}
+
+\comentario{De aqu\'i en adelante, para el rep y abs, por cuestiones de brevedad y legibilidad, se referir\'a al primer nodo del arbol como estr.primero; al padre de cada nodo simplemente como nodo.padre; a el valor propiamente dicho como nodo.valor y a cada nodo(tupla(nat, tupla(puntero(nodo$\alpha$), $\alpha$))) como nodo($\alpha$).}
+
+\end{Estructura}
+
+\comentario{Rep en castellano:}
+\comentario{El invariante del \'arbol binario se sigue cumpliendo para arb}
+\comentario{1: El tama\~no del \'arbol (size) debe ser igual a la cantidad de nodos en el \'arbol}
+\comentario{2: El primer elemento no tiene padre}
+\comentario{3: Todos los nodos, con la excepci\'on del primero, deben tener padre, y deben ser el hijo izquierdo o (exclusivo) derecho de su padre (el invariante del \'arbol binario garantiza que ning\'un nodo pueda ser tanto el hijo izquierdo como el derecho de su padre)}
+\comentario{4: La prioridad del padre es menor o igual a la de los hijos}
+\comentario{5: La altura del \'arbol es igual a uno m\'as la parte entera del logaritmo de su tama\~no (es decir que la altura del \'arbol es O(log(n))}
+
+Rep: estr\_heap($\alpha$) $\rightarrow$ bool
+\newline \indent Rep($estr$) $\equiv$ true $\iff$
+\comentario{1} $size = \# arbol(estr.primero) \ \wedge_L$
+\comentario{2} $((estr.primero).padre = null \wedge$
+\comentario{3} $(\forall n: nodo(\alpha))( n \in arbol(estr.primero) \wedge \ n \neq estr.primero \Rightarrow (n.padre \neq null \wedge_L (((n.padre).izq = n \vee (n.padre).der = n ) ))) \wedge$
+\comentario{4} $(\forall n: nodo(\alpha))( n \in arbol(estr.primero) \Rightarrow ((n.izq \neq null \Rightarrow n.prio \leq (n.izq).prio) \wedge (n.der \neq null \Rightarrow n.prio \leq (n.der).prio))) \wedge$
+\comentario{5} $(\forall n: nodo(\alpha))( n \in arbol(estr.primero) \Rightarrow caminoHastaRaiz(n,arbol(estr.primero)) \leq \left \lfloor{log_2(size)}\right \rfloor + 1))$
+
+\textbf{}
+\textbf{}
+
+Abs: estr\_heap($\alpha$) $e \rightarrow$ colaPrio($\alpha$) \{ Rep($e$) \} \newline
+Abs($e$) $\equiv$ c: colaPrio($\alpha$) | $(Vacia?(c) \iff e.primero == NULO) \wedge_L
+\newline \indent (\neg Vacia?(c) \Rightarrow Proximo(c) =\ <*(estr.primero)).prioridad, *(estr.primero)).valor> \ \wedge
+\newline \indent (\neg Vacia?(e) \Rightarrow Desencolar(e) = Desencolar(c))$
+
+\textbf{}
+\textbf{}
+
+\comentario{Las operaciones auxiliares utilizadas en la especificaci\'on del Rep y el Abs est\'an detalladas en la Estructura del Arbol Binario}	
+%\textbf{if} $n.izq \neq null \wedge n.der \neq null$ \textbf{then} Ag($n.valor,arbol(n.izq)\cup arbol(n.der)$) \textbf{else}
+%\textbf{if} $n.izq \neq null$ \textbf{then} Ag($n.valor,arbol(n.izq)$) \textbf{else} \textbf{if} $n.der \neq null$ \textbf{then} Ag($n.valor,arbol(n.der)$) \textbf{else} Ag($n.valor,\emptyset$)}
+
+
+\end{Representacion}
+
+\newpage
+
+\begin{Algoritmos}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Vacia}
+\begin{algorithmic}[0]
+\Function{iVacia}{}{$\rightarrow$ res: colaLog($\alpha$)}
+\State res $\gets$ <0, nil()> \Comment{O(1)}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Vacia?}
+\begin{algorithmic}[0]
+\Function{iVacia?}{\In{estr}{estr\_heap($\alpha$)}}{$\rightarrow res$: bool}
+\State res $\gets$ nil?(estr.arb) \Comment{O(1)}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Pr\'oximo}
+\begin{algorithmic}[0]
+\Function{Pr\'oximo}{\In{estr}{estr\_heap($\alpha$)}}{$\rightarrow res$: tupla($nat, \alpha$)}
+\State res $\gets$ <(raiz(estr.arb)).prio, (raiz(estr.arb)).valor> \Comment{O(copiar($\alpha$))}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Implementaci\'on de Encolar}
+\begin{algorithmic}[0]
+\Function{iEncolar}{\Inout{estr}{estr\_heap($\alpha$)}, \In{prio}{nat}, \In{valor}{$\alpha$}}{$\rightarrow res$: bool}
+	\State res $\gets$ true	 \Comment{O(1)}
+	\If{nil?(estr.arb)} \Comment{O(1)}
+		\State $estr.ab \gets$ bin(nil(), <prio, valor, nil()>, nil()) \Comment{O(copiar($\alpha$))}
+	\Else
+		\State size++ \Comment{O(1)}
+		\State x $\gets$ size \Comment{O(1)}
+		\State y $\gets$ <> \Comment{O(1)}
+		\While{x $\neq$ 0} \Comment{La cantidad de veces que se ejecuta el ciclo es igual a la altura del heap. Al ser un arbol binario completo, la altura siempre ser\'a O(log(n))}
+			\State y $\gets$ (x \% 2) $\bullet$ y \Comment{O(1)}
+			\State x $\gets$ x $\/$ 2 \Comment{O(1)}
+		\EndWhile
+		\State y $\gets$ com(y) \Comment{O(log(n))}
+		\State z $\gets$ estr.arb \Comment{O(1)}
+		\State y $\gets$ fin(y) \Comment{O(1)}
+		\While{long(y)>1} \Comment{El ciclo se ejecuta O(log(n)) veces}
+			\State z $\gets$ \textbf{if} prim(y) $==$ 0 \textbf{then} izq(z) \textbf{else} der(z) \Comment{O(1)}
+			\State y $\gets$ fin(y) \Comment{O(1)}
+		\EndWhile
+		\State w $\gets$ bin(nil(), <prio,valor, z>, nil()) \Comment{O(copiar($\alpha$))}
+		\If{prim($y$) $==$ 0} \Comment{O(1)}
+			\State setearIzq(z, w) \Comment{O(1)}
+		\Else
+			\State setearDer(z, w) \Comment{O(1)}
+		\EndIf
+		\While{w $\neq$ estr.abs $\wedge_L$ $\pi_1$(raiz(w)) > $\pi_1$(raiz($\pi_3$(raiz(w))))} \Comment{La cantidad de veces que se ejecuta el ciclo es a lo sumo la altura del heap, que es O(log(n))}
+			\State aux $\gets$ $\pi_1$(raiz(w)) \Comment{O(copiar($\alpha$))}
+			\State $\pi_2$(raiz(w)) $\gets$ $\pi_2$(raiz($\pi_3$(raiz(w)))) \Comment{O(copiar($\alpha$))}
+			\State $\pi_2$(raiz($\pi_3$(raiz(w)))) $\gets$ aux \Comment{O(copiar($\alpha$))}
+			\State aux2 $\gets$ $\pi_1$(raiz(w)) \Comment{O(1)}
+			\State $\pi_1$(raiz(w)) $\gets$ $\pi_1$(raiz($\pi_3$(raiz(w)))) \Comment{O(1)}
+			\State $\pi_1$(raiz($\pi_3$(raiz(w)))) $\gets$ aux2 \Comment{O(1)}
+			\State w $\gets$ $\pi_3$(raiz(w)) \Comment{O(1)}
+		\EndWhile
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{algorithm}
+\caption{Implementaci\'on de Desencolar}
+\begin{algorithmic}[0]
+\Function{iDesencolar}{\Inout{estr}{estr\_heap($\alpha$)}}{$\rightarrow res$: $\alpha$}
+	\State res $\gets$  raiz(estr.arb) \Comment{O(1)}
+	\State x $\gets$  size \Comment{O(1)}
+	\State y $\gets$   <> \Comment{O(1)}
+	\While{x $\neq$ 0} \Comment{La cantidad de veces que se ejecuta el ciclo es igual a la altura del heap. Al ser un arbol binario completo, la altura siempre ser\'a O(log(n))}
+		\State y $\gets$ (x \% 2) $\bullet$ y \Comment{O(1)}
+		\State x $\gets$ x $\/$ 2 \Comment{O(1)}
+	\EndWhile
+	\State y $\gets$ com(y) \Comment{O(log(n))}
+	\State z $\gets$ estr.arb \Comment{O(1)}
+	\State y $\gets$ fin(y) \Comment{O(1)}
+	\While{long(y) >1} \Comment{El ciclo se ejecuta O(log(n)) veces}
+		\State z $\gets$ \textbf{if} prim(y) $==$ 0 \textbf{then} izq(z) \textbf{else} der(z) \Comment{O(1)}
+		\State y $\gets$ fin(y) \Comment{O(1)}
+	\EndWhile
+	\State w $\gets$ bin(nil() ,<prio, valor, nil()>, nil()> \Comment{O(copiar($\alpha$))}
+	\State raiz(w).padre $\gets$ z \Comment{O(1)}
+	\If{prim(y) $==$ 0} \Comment{O(1)}
+		\State setearIzq(z, w) \Comment{O(1)}
+	\Else
+		\State setearDer(z, w) \Comment{O(1)}
+	\EndIf
+	\State (raiz(estr.arb)).valor $\gets$ raiz(z).valor \Comment{O(copiar($\alpha$))}
+	\State (raiz(estr.arb)).prio $\gets$ raiz(z).prio \Comment{O(1)}
+	\State borrar(z) \Comment{O(borrar($\alpha$))}
+	\State z $\gets$ estr.arb \Comment{O(1)}
+	\State size-- \Comment{O(1)}
+	\While{(izq(z) $\neq$ null  $\vee$ der(z) $\neq$ null) $\wedge_L$  raiz(z).prio < minPrio(izq(z), der(z))} \Comment{La cantidad de veces que se ejecuta el ciclo es a lo sumo la altura del heap, que es O(log(n))}
+
+	\State \comentario{minPrio devuelve la m\'inima prioridad entre los nodos si ambos punteros son validos, o la prioridad apuntada por
+	el puntero no nulo en caso de que alguno no lo sea}
+	\If{der(z) $==$ null  $\vee_L$  raiz(izq(z)).prio $\geq$ raiz(der(z)).prio} \Comment{O(1)}
+		\State aux $\gets$ raiz(z).valor \Comment{O(copiar($\alpha$))}
+		\State raiz(z).valor $\gets$ raiz(izq(z)).valor \Comment{O(copiar($\alpha$))}
+		\State raiz(izq(z)).valor $\gets$ aux \Comment{O(copiar($\alpha$))}
+		\State aux2 $\gets$ raiz(z).prio \Comment{O(1)}
+		\State raiz(z).prio $\gets$ raiz(izq(z)).prio \Comment{O(1)}
+		\State raiz(izq(z)).prio $\gets$ aux2 \Comment{O(1)}
+		\State z $\gets$ izq(z) \Comment{O(1)}
+	\Else
+		\State aux $\gets$ raiz(z).valor \Comment{O(copiar($\alpha$))}
+		\State raiz(z).valor $\gets$ raiz(der(z)).valor \Comment{O(copiar($\alpha$))}
+		\State raiz(der(z)).valor $\gets$ aux \Comment{O(copiar($\alpha$))}
+		\State aux2 $\gets$  raiz(z).prio \Comment{O(1)}
+		\State raiz(z).prio $\gets$ raiz(der(z)).prio \Comment{O(1)}
+		\State raiz(der(z)).prio $\gets$ aux2 \Comment{O(1)}
+		\State z $\gets$ der(z) \Comment{O(1)}
+	\EndIf
+	\EndWhile
+
+
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\FloatBarrier
+\end{Algoritmos}
+
+
